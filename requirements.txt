@@ -1,0 +1,21 @@
+# Core dependencies
+torch>=2.0.0
+torchaudio>=2.0.0
+transformers>=4.30.0
+accelerate>=0.20.0
+
+# Audio processing
+sounddevice>=0.4.6
+soundfile>=0.12.1
+librosa>=0.10.0
+numpy>=1.24.0
+
+# Additional utilities
+scipy>=1.10.0
+sentencepiece>=0.1.99
+protobuf>=3.20.0
+huggingface-hub>=0.16.0
+pyyaml>=6.0
+
+# Optional: For better performance
+# optimum>=1.12.0

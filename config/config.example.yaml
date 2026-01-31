@@ -1,0 +1,50 @@
+# Real-time Audio Translator Configuration (Example)
+# Copy this file to config.yaml and customize for your needs
+
+# Model Settings
+models:
+  # Speech-to-Text model from Hugging Face
+  # Options: openai/whisper-tiny, openai/whisper-small, openai/whisper-base
+  # Smaller = faster, larger = more accurate
+  stt_model: "openai/whisper-small"
+  
+  # Translation model from Hugging Face
+  # Default supports 200+ languages
+  translation_model: "facebook/nllb-200-distilled-1.3B"
+  
+  # Text-to-Speech model from Hugging Face
+  # For multilingual: facebook/mms-tts-<lang_code>
+  tts_model: "facebook/mms-tts-eng"
+
+# Language Settings
+# Use NLLB language codes (see documentation for full list)
+languages:
+  source: "eng_Latn"  # Source language (what you speak)
+  target: "spa_Latn"  # Target language (what you want to translate to)
+
+# Audio Settings
+audio:
+  sample_rate: 16000           # Audio sample rate in Hz (16000 is standard)
+  recording_duration: 5        # Recording chunk duration in seconds
+  channels: 1                  # Number of audio channels (1=mono, 2=stereo)
+
+# Performance Settings
+performance:
+  use_gpu: false               # Use GPU if available (CUDA required)
+  low_memory: true             # Optimize for low memory devices (Raspberry Pi)
+  batch_size: 16               # Batch size for model inference
+  max_new_tokens: 128          # Maximum tokens for STT generation
+
+# Common Language Codes Reference
+# English: eng_Latn
+# Spanish: spa_Latn
+# French: fra_Latn
+# German: deu_Latn
+# Italian: ita_Latn
+# Portuguese: por_Latn
+# Russian: rus_Cyrl
+# Chinese (Simplified): zho_Hans
+# Japanese: jpn_Jpan
+# Korean: kor_Hang
+# Arabic: arb_Arab
+# Hindi: hin_Deva
