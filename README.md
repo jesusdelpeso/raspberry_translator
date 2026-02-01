@@ -28,7 +28,8 @@ Perfect for language learning, international communication, or accessibility app
 ### ✨ Key Features
 
 - 🎯 **Real-time Translation**: Processes audio in configurable chunks for near real-time results
-- 🌍 **200+ Languages**: Supports translation between over 200 languages
+- �️ **Streaming Transcription**: Sentence-by-sentence real-time audio transcription (NEW!)
+- �🌍 **200+ Languages**: Supports translation between over 200 languages
 - 🤖 **State-of-the-art AI**: Uses OpenAI Whisper, Meta NLLB, and Hugging Face TTS models
 - 🍓 **Raspberry Pi Optimized**: Configured to run efficiently on Raspberry Pi 5 hardware
 - ⚙️ **Highly Configurable**: YAML-based configuration for easy customization
@@ -63,12 +64,24 @@ Perfect for language learning, international communication, or accessibility app
 
 ---
 
+## 🆕 Recent Updates
+
+### February 1, 2026
+- ✨ **NEW: Language Parameter** - Added `--language` parameter to streaming transcription for better accuracy with specific languages
+- 🐛 **Fixed**: Python command compatibility issue in `run_streaming_transcribe.sh`
+- 📝 **Enhanced**: Comprehensive documentation for streaming transcription with 14+ language codes
+- ✅ **Tested**: Spanish language transcription working successfully
+- 🎯 **Improved**: Warning suppression for cleaner output
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
 - [Requirements](#-requirements)
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
+- [Streaming Transcription](#-streaming-transcription-new)
 - [Configuration](#-configuration)
 - [Usage](#-usage)
 - [Project Structure](#-project-structure)
@@ -77,7 +90,7 @@ Perfect for language learning, international communication, or accessibility app
 - [Troubleshooting](#-troubleshooting)
 - [Advanced Usage](#-advanced-usage)
 - [Contributing](#-contributing)
-- [License](#-license)
+- [License](#-license
 
 ---
 
@@ -187,6 +200,83 @@ Models will be automatically downloaded on first run, but you can pre-download t
 
 ---
 
+## 🎙️ Streaming Transcription (NEW!)
+
+In addition to the translation pipeline, this project now includes a **real-time streaming transcription** tool that continuously captures audio and transcribes it sentence by sentence.
+
+### Quick Start
+
+```bash
+# Basic usage
+./scripts/run_streaming_transcribe.sh
+
+# With GPU acceleration
+./scripts/run_streaming_transcribe.sh --gpu
+
+# Specify language for better accuracy
+./scripts/run_streaming_transcribe.sh --language en
+
+# Adjust sensitivity
+./scripts/run_streaming_transcribe.sh --vad-threshold 0.015
+```
+
+### Key Features
+
+- ✅ **Continuous transcription**: Runs indefinitely until stopped
+- ✅ **Sentence detection**: Automatically detects sentence boundaries using punctuation and silence
+- ✅ **Voice Activity Detection**: Only transcribes when speech is detected
+- ✅ **Configurable parameters**: Adjust VAD threshold, silence duration, chunk size, etc.
+- ✅ **Multiple Whisper models**: Choose from tiny/base/small/medium/large
+
+### Example Session
+
+```bash
+$ ./scripts/run_streaming_transcribe.sh
+
+================================================================================
+STREAMING AUDIO TRANSCRIPTION
+================================================================================
+Sample rate: 16000 Hz
+Chunk duration: 3.0s
+VAD threshold: 0.02
+Silence duration for sentence end: 1.5s
+================================================================================
+
+Processing audio... Speak into the microphone.
+Press Ctrl+C to stop.
+
+--------------------------------------------------------------------------------
+
+[Sentence 1]: Hello, this is a test of the streaming transcription system.
+--------------------------------------------------------------------------------
+
+[Sentence 2]: It works really well for real-time transcription.
+--------------------------------------------------------------------------------
+```
+
+### Available Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--model` | `openai/whisper-small` | Whisper model to use |
+| `--language` | `None` | Language code (e.g., 'en', 'es', 'fr'). Auto-detect if not specified |
+| `--vad-threshold` | `0.02` | Voice activity detection threshold |
+| `--silence-duration` | `1.5` | Silence duration to mark sentence end (seconds) |
+| `--chunk-duration` | `3.0` | Audio chunk duration (seconds) |
+| `--gpu` | `False` | Use GPU if available |
+| `--list-devices` | - | List audio devices and exit |
+
+### Documentation
+
+For comprehensive documentation, see [STREAMING_TRANSCRIPTION.md](STREAMING_TRANSCRIPTION.md), which includes:
+- Detailed usage examples
+- Parameter tuning guide
+- Troubleshooting tips
+- Technical implementation details
+- Performance optimization
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -206,6 +296,8 @@ raspberry_translator/
 ├── scripts/                        # Executable scripts
 │   ├── run_translator.py          # Main executable script
 │   ├── run.sh                     # Convenience shell runner
+│   ├── streaming_transcribe.py    # Streaming transcription app (NEW)
+│   ├── run_streaming_transcribe.sh # Streaming transcription runner (NEW)
 │   ├── setup.sh                   # Automated setup script
 │   ├── test_setup.py              # System verification tests
 │   ├── download_models.py         # Pre-download AI models
@@ -214,6 +306,9 @@ raspberry_translator/
 │
 ├── requirements.txt               # Python dependencies
 ├── README.md                      # This file
+├── CHANGELOG.md                   # Version history and changes (NEW)
+├── STREAMING_TRANSCRIPTION.md     # Streaming transcription docs (NEW)
+├── STREAMING_TRANSCRIPTION_FIXES.md # Testing & troubleshooting (NEW)
 └── .gitignore                     # Git ignore rules
 ```
 
@@ -226,6 +321,7 @@ raspberry_translator/
 | **src/models.py** | Hugging Face model initialization and management |
 | **src/audio_handler.py** | Microphone input and speaker output handling |
 | **src/translator.py** | Orchestrates the full translation pipeline |
+| **scripts/streaming_transcribe.py** | Real-time streaming transcription with sentence detection |
 
 ---
 
@@ -479,6 +575,41 @@ This test:
 - ✓ Generates speech output from translated text
 - ✓ Verifies the complete pipeline works end-to-end
 
+---
+
+## 📊 Quick Reference
+
+### Application Comparison
+
+| Feature | Translation App | Streaming Transcription |
+|---------|----------------|------------------------|
+| **Purpose** | Translate speech between languages | Transcribe speech to text |
+| **Output** | Spoken translation | Text transcription |
+| **Mode** | Fixed-duration chunks | Continuous streaming |
+| **Languages** | 200+ translation pairs | Auto-detect or specify |
+| **Sentence Detection** | No | Yes (punctuation + silence) |
+| **Main Script** | `./scripts/run.sh` | `./scripts/run_streaming_transcribe.sh` |
+| **Use Cases** | International communication, learning | Transcription, captions, note-taking |
+
+### Command Cheat Sheet
+
+```bash
+# Translation Application
+./scripts/run.sh                           # Default translation
+./scripts/run.sh --duration 8              # 8-second recording chunks
+./scripts/run.sh --source-lang fra_Latn \
+  --target-lang eng_Latn                   # French to English
+
+# Streaming Transcription
+./scripts/run_streaming_transcribe.sh                     # Auto-detect language
+./scripts/run_streaming_transcribe.sh --language en      # English transcription
+./scripts/run_streaming_transcribe.sh --language es      # Spanish transcription
+./scripts/run_streaming_transcribe.sh --gpu              # Use GPU acceleration
+./scripts/run_streaming_transcribe.sh --vad-threshold 0.015  # Adjust sensitivity
+```
+
+---
+
 ## 📝 License
 
 This project is open source and available under the MIT License.
@@ -497,3 +628,19 @@ This project is made possible by:
 - **[Hugging Face](https://huggingface.co/)** for the Transformers library and model hosting
 - **[Raspberry Pi Foundation](https://www.raspberrypi.org/)** for accessible computing hardware
 - The open-source community for continuous improvements
+
+---
+
+## 📚 Additional Documentation
+
+- [STREAMING_TRANSCRIPTION.md](STREAMING_TRANSCRIPTION.md) - Complete streaming transcription guide
+- [STREAMING_TRANSCRIPTION_FIXES.md](STREAMING_TRANSCRIPTION_FIXES.md) - Testing results and troubleshooting
+- [CHANGELOG.md](CHANGELOG.md) - Version history and recent changes
+- [FIXES_SUMMARY.md](FIXES_SUMMARY.md) - Historical bug fixes and solutions
+
+---
+
+**Version**: 1.1.0 (February 2026)  
+**Status**: Active Development  
+**Python**: 3.9+  
+**Platform**: Raspberry Pi 5 (optimized), Linux (tested)

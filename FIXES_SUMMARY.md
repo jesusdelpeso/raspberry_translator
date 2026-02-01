@@ -1,6 +1,6 @@
 # FIXES_SUMMARY.md
 
-## Technical Fixes Applied - February 1, 2026
+## Technical Fixes Applied - February 1-2, 2026
 
 ### Summary
 Successfully debugged and fixed the Raspberry Pi Real-time Audio Translator application. All components now work correctly:
@@ -8,6 +8,7 @@ Successfully debugged and fixed the Raspberry Pi Real-time Audio Translator appl
 - ✓ Translation (NLLB) pipeline with custom wrapper
 - ✓ Text-to-Speech (MMS-TTS) generation
 - ✓ End-to-end translation verified: English → Spanish
+- ✓ Streaming transcription with graceful interrupt handling
 
 ---
 
@@ -98,6 +99,72 @@ if forced_bos_token_id is None:
 
 **Result:**
 - ✓ Works with transformers 4.30+ through 4.50+
+
+---
+
+## Issue #3: Streaming Transcription Crash on Interrupt (February 2, 2026)
+
+**Error Message:**
+```
+terminate called without an active exception
+Aborted (core dumped)
+```
+
+**Root Cause:**
+- Processing thread not properly cleaned up during shutdown
+- Audio stream resources closed while callback thread still active
+- No proper exception handling for KeyboardInterrupt
+- Thread join could hang indefinitely
+
+**Solution:**
+Implemented comprehensive cleanup and exception handling:
+
+1. **Daemon Thread**: Made processing thread a daemon to prevent blocking program exit
+2. **Context Manager**: Used `with sd.InputStream()` for automatic resource cleanup
+3. **Exception Handling**: Separate handlers for KeyboardInterrupt and general exceptions
+4. **Cleanup Sequence**: Set `is_recording = False` in finally block
+5. **Timeout Protection**: Added 2-second timeout to thread join
+
+**Files Modified:**
+- `scripts/streaming_transcribe.py` (start_streaming method)
+
+**Code Changes:**
+```python
+# Daemon thread for automatic cleanup
+processing_thread = threading.Thread(target=self.process_audio_stream, daemon=True)
+processing_thread.start()
+
+# Context manager for stream
+try:
+    with sd.InputStream(
+        samplerate=self.sample_rate,
+        channels=1,
+        dtype=np.float32,
+        blocksize=self.chunk_samples,
+        callback=self.audio_callback,
+    ) as stream:
+        while self.is_recording and processing_thread.is_alive():
+            time.sleep(0.1)
+
+except KeyboardInterrupt:
+    print("\n\nReceived interrupt signal...")
+
+except Exception as e:
+    print(f"\nError with audio stream: {e}", file=sys.stderr)
+
+finally:
+    self.is_recording = False
+    if processing_thread.is_alive():
+        processing_thread.join(timeout=2.0)
+    print("\nStream closed.")
+```
+
+**Result:**
+- ✓ Clean exit on Ctrl+C without crashes
+- ✓ No core dumps generated
+- ✓ All resources properly released
+- ✓ Thread termination with timeout prevents hanging
+- ✓ Verified with all safety checks passing
 - ✓ Gracefully handles different tokenizer backends
 - ✓ Provides clear error messages if language code is invalid
 
