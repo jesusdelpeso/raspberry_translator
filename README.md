@@ -14,6 +14,7 @@ A Python application that provides real-time speech translation using state-of-t
 
 ---
 
+
 ## 📖 Overview
 
 This project implements a complete real-time translation pipeline that:
