@@ -1,5 +1,62 @@
 # FIXES_SUMMARY.md
 
+## Technical Fixes Applied - February 2, 2026
+
+### Recent Fixes
+
+#### Fix #4: Parakeet Model Setup and Dependencies (February 2, 2026)
+
+**Issue:**
+Running streaming transcription with Parakeet configuration failed due to:
+1. Missing NeMo toolkit dependency (`ModuleNotFoundError: No module named 'nemo'`)
+2. Parakeet model not downloaded (~600MB from Hugging Face)
+3. No clear setup process documented
+
+**Solution:**
+1. Installed NeMo ASR package: `pip install nemo_toolkit['asr']`
+2. Created helper script `scripts/download_parakeet_model.py`:
+   - Automated model download with progress tracking
+   - Resume support for interrupted downloads
+   - Validates NeMo installation before downloading
+   - Clear error messages and troubleshooting
+
+3. Enhanced documentation:
+   - Created `PARAKEET_FIX.md` with complete setup guide
+   - Updated installation instructions
+   - Added verification steps
+
+**Verification:**
+```bash
+pip install -r requirements_parakeet.txt
+python scripts/download_parakeet_model.py
+./scripts/run_streaming_transcribe.sh -c streaming_config_parakeet.yaml
+```
+
+**Status:** ✓ Resolved - Parakeet model fully functional after setup
+
+---
+
+#### Enhancement #2: Config File Selection (February 2, 2026)
+
+**Feature Added:**
+Command-line parameter to specify configuration file in `run_streaming_transcribe.sh`
+
+**Implementation:**
+- Added `-c` / `--config` parameter
+- Automatic path resolution from `config/` directory
+- Built-in help message (`--help`)
+- File existence validation with helpful errors
+
+**Usage:**
+```bash
+./scripts/run_streaming_transcribe.sh -c streaming_config_parakeet.yaml
+./scripts/run_streaming_transcribe.sh --config config/my_config.yaml
+```
+
+**Status:** ✓ Complete
+
+---
+
 ## Technical Fixes Applied - February 1-2, 2026
 
 ### Summary
@@ -9,6 +66,7 @@ Successfully debugged and fixed the Raspberry Pi Real-time Audio Translator appl
 - ✓ Text-to-Speech (MMS-TTS) generation
 - ✓ End-to-end translation verified: English → Spanish
 - ✓ Streaming transcription with graceful interrupt handling
+- ✓ Parakeet model support with NeMo integration
 
 ---
 

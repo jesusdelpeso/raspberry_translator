@@ -1,0 +1,40 @@
+# Streaming Transcription Configuration - Parakeet Model
+# This configuration uses NVIDIA's Parakeet model for high-accuracy transcription
+
+# Model Settings
+model:
+  # NVIDIA Parakeet TDT model - Superior accuracy for 25 European languages
+  # Requires: pip install nemo_toolkit['asr']
+  name: "nvidia/parakeet-tdt-0.6b-v3"
+  
+  # Use GPU if available (recommended for Parakeet)
+  use_gpu: false
+
+# Audio Settings
+audio:
+  # Audio sample rate in Hz (16000 is standard)
+  sample_rate: 16000
+  
+  # Duration of audio chunks to process (in seconds)
+  chunk_duration: 3.0
+  
+  # Voice Activity Detection threshold (0.0 to 1.0)
+  vad_threshold: 0.02
+  
+  # Silence duration to consider end of sentence (in seconds)
+  silence_duration: 1.5
+
+# Language Settings
+language:
+  # Parakeet automatically detects language from 25 supported languages
+  # You can specify a language code for better accuracy, or use 'auto'
+  # Supported: bg, hr, cs, da, nl, en, et, fi, fr, de, el, hu, it, 
+  #            lv, lt, mt, pl, pt, ro, sk, sl, es, sv, ru, uk
+  code: "auto"
+
+# Parakeet Features:
+# - Automatic punctuation and capitalization
+# - Word-level timestamps available
+# - Better accuracy than Whisper on most European languages
+# - Optimized for throughput
+# - 600M parameter model

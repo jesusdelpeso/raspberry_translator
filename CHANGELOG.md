@@ -4,6 +4,69 @@ All notable changes to the Raspberry Pi Real-time Audio Translator project will 
 
 ## [Unreleased] - 2026-02-02
 
+### Fixed - Audio Streaming (PortAudio/ALSA)
+- **Critical fix for audio capture** (`streaming_transcribe.py`)
+  - Fixed PortAudio threading timeout errors on Linux systems
+  - Changed from callback-based to blocking read mode for audio capture
+  - Resolved "Wait timed out [PaErrorCode -9987]" error
+  - Added retry logic (3 attempts) for audio stream initialization
+  - Improved error handling with detailed troubleshooting messages
+  - Optimized block size (reduced from 48,000 to 1,024 samples)
+  - Added buffer overflow detection and reporting
+  - Audio streaming now works reliably on all tested Linux systems
+
+- **Documentation**
+  - `AUDIO_STREAMING_FIXES.md` - Comprehensive technical documentation
+  - Details root cause, solution, and testing results
+  - Usage recommendations for production deployment
+  - Technical comparison of callback vs blocking read modes
+
+### Added - Config File Selection
+- **Enhanced shell script** (`run_streaming_transcribe.sh`)
+  - Added `-c` / `--config` parameter to specify configuration file
+  - Automatic path resolution from config/ directory
+  - Built-in help message with usage examples
+  - Config file existence validation with helpful error messages
+  - Lists available configs when specified file not found
+  - Backward compatible - still uses default config when not specified
+
+### Added - Parakeet Model Setup Tools
+- **Download helper script** (`scripts/download_parakeet_model.py`)
+  - Automated download of Parakeet model from Hugging Face
+  - Progress tracking and resume support for ~600MB download
+  - Validates NeMo installation before downloading
+  - Shows download status and file location
+  - Clear error messages and troubleshooting guidance
+
+### Fixed - Parakeet Model Setup
+- **Resolved dependency issues**
+  - Installed nemo_toolkit[asr] for Parakeet model support
+  - Documented model download requirement (~600MB)
+  - Created step-by-step setup guide in PARAKEET_FIX.md
+  - Added verification steps for installation
+
+### Added - Parakeet Model Support
+- **Multi-model ASR support** (`streaming_transcribe.py`)
+  - Added support for NVIDIA Parakeet TDT models alongside Whisper
+  - Automatic model type detection from model name
+  - Native NeMo integration for Parakeet models
+  - Maintains unified interface for both Whisper and Parakeet
+  - Superior accuracy with `nvidia/parakeet-tdt-0.6b-v3` (600M params, 25 languages)
+  - Automatic punctuation and capitalization with Parakeet
+  - Word-level timestamps support (Parakeet)
+
+- **Documentation**
+  - `PARAKEET_SUPPORT.md` - Complete guide for Parakeet models
+  - `requirements_parakeet.txt` - Optional dependencies for Parakeet
+  - Updated configuration examples with Parakeet options
+  - Performance comparison between Whisper and Parakeet
+  - Installation and usage instructions
+
+- **Configuration enhancements**
+  - Added Parakeet model to config examples
+  - Updated model selection documentation
+  - Added tips for choosing between Whisper and Parakeet
+
 ### Fixed - Streaming Transcription
 - **Fixed crash on interrupt** (`streaming_transcribe.py`)
   - Resolved "terminate called without an active exception" error when pressing Ctrl+C

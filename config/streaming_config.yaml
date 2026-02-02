@@ -1,0 +1,53 @@
+# Streaming Transcription Configuration
+# Configuration file for streaming audio transcription
+
+# Model Settings
+model:
+  # ASR model from Hugging Face
+  # Whisper models: openai/whisper-tiny, openai/whisper-base, openai/whisper-small, openai/whisper-medium
+  # Parakeet models: nvidia/parakeet-tdt-0.6b-v3 (600M params, 25 languages, very accurate)
+  # Smaller = faster but less accurate, larger = slower but more accurate
+  name: "openai/whisper-small"
+  
+  # Use GPU if available (requires CUDA)
+  use_gpu: false
+
+# Audio Settings
+audio:
+  # Audio sample rate in Hz (16000 is standard for Whisper)
+  sample_rate: 16000
+  
+  # Duration of audio chunks to process (in seconds)
+  # Shorter = more responsive, longer = better context
+  chunk_duration: 3.0
+  
+  # Voice Activity Detection threshold (0.0 to 1.0)
+  # Lower = more sensitive, higher = less sensitive to quiet sounds
+  vad_threshold: 0.02
+  
+  # Silence duration to consider end of sentence (in seconds)
+  # Shorter = more frequent sentence breaks, longer = longer sentences
+  silence_duration: 1.5
+
+# Language Settings
+language:
+  # Specify language code for better accuracy, or leave as 'auto' for auto-detection
+  # Supported: en, es, fr, de, it, pt, nl, pl, ru, zh, ja, ko, ar, hi, etc.
+  # Use 'auto' for automatic language detection
+  code: "es"
+
+# Common language codes:
+# en - English
+# es - Spanish
+# fr - French
+# de - German
+# it - Italian
+# pt - Portuguese
+# nl - Dutch
+# pl - Polish
+# ru - Russian
+# zh - Chinese
+# ja - Japanese
+# ko - Korean
+# ar - Arabic
+# hi - Hindi

@@ -57,14 +57,26 @@ Perfect for language learning, international communication, or accessibility app
 | Component | Model | Description |
 |-----------|-------|-------------|
 | **Speech-to-Text** | `openai/whisper-small` | Balanced accuracy and performance for Raspberry Pi |
+| **Speech-to-Text (Alt)** | `nvidia/parakeet-tdt-0.6b-v3` | High accuracy multilingual (25 languages, optional) |
 | **Translation** | `facebook/nllb-200-distilled-1.3B` | Supports 200+ languages with good quality |
 | **Text-to-Speech** | `facebook/mms-tts-eng` | Lightweight, suitable for edge devices |
 
-*All models are customizable via configuration file*
+*All models are customizable via configuration file. See [PARAKEET_SUPPORT.md](PARAKEET_SUPPORT.md) for Parakeet setup.*
 
 ---
 
 ## 🆕 Recent Updates
+
+### February 2, 2026
+- 🔧 **FIXED: Audio Streaming** - Resolved critical PortAudio threading timeout errors on Linux
+  - Changed from callback to blocking read mode for reliable audio capture
+  - Added retry logic and improved error handling
+  - See [AUDIO_STREAMING_FIXES.md](AUDIO_STREAMING_FIXES.md) for technical details
+- ✨ **NEW: Parakeet Model Support** - Added support for NVIDIA Parakeet TDT models with superior accuracy
+- ✨ **NEW: Configuration File** - Streaming transcription now uses YAML config for easier setup
+- 🐛 **Fixed**: Crash on interrupt (Ctrl+C) in streaming transcription
+- 📝 **Enhanced**: Configuration-based workflow with command line overrides
+- 🎯 **Improved**: Support for both Whisper and Parakeet ASR models
 
 ### February 1, 2026
 - ✨ **NEW: Language Parameter** - Added `--language` parameter to streaming transcription for better accuracy with specific languages
@@ -152,6 +164,21 @@ cp config/config.example.yaml config/config.yaml
 
 Models will be automatically downloaded on first run, but you can pre-download them:
 
+**For Whisper models (default):**
+- Models download automatically on first use
+- No additional setup required
+
+**For Parakeet models (optional, higher accuracy):**
+```bash
+# Install NeMo toolkit
+pip install -r requirements_parakeet.txt
+
+# Download Parakeet model (~600MB)
+python scripts/download_parakeet_model.py
+```
+
+See [PARAKEET_SUPPORT.md](PARAKEET_SUPPORT.md) for details.
+
 ---
 
 ## ⚡ Quick Start
@@ -207,8 +234,11 @@ In addition to the translation pipeline, this project now includes a **real-time
 ### Quick Start
 
 ```bash
-# Basic usage
+# Basic usage (uses default config)
 ./scripts/run_streaming_transcribe.sh
+
+# Use specific config file
+./scripts/run_streaming_transcribe.sh -c streaming_config_parakeet.yaml
 
 # With GPU acceleration
 ./scripts/run_streaming_transcribe.sh --gpu
@@ -258,13 +288,15 @@ Press Ctrl+C to stop.
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--model` | `openai/whisper-small` | Whisper model to use |
+| `-c`, `--config` | `config/streaming_config.yaml` | Configuration file to use |
+| `--model` | `openai/whisper-small` | Whisper/Parakeet model to use |
 | `--language` | `None` | Language code (e.g., 'en', 'es', 'fr'). Auto-detect if not specified |
 | `--vad-threshold` | `0.02` | Voice activity detection threshold |
 | `--silence-duration` | `1.5` | Silence duration to mark sentence end (seconds) |
 | `--chunk-duration` | `3.0` | Audio chunk duration (seconds) |
 | `--gpu` | `False` | Use GPU if available |
 | `--list-devices` | - | List audio devices and exit |
+| `-h`, `--help` | - | Show help message with usage examples |
 
 ### Documentation
 

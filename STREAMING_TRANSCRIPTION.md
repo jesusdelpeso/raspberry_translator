@@ -98,6 +98,49 @@ Specifying the language improves transcription accuracy and speed:
 
 **Common language codes:**
 - `en` - English
+
+## Troubleshooting
+
+### Audio Stream Errors
+
+If you encounter audio capture errors like:
+```
+Expression 'paTimedOut' failed in 'src/os/unix/pa_unix_util.c'
+Error starting stream: Wait timed out [PaErrorCode -9987]
+```
+
+**These errors have been fixed** in the latest version (February 2, 2026). The script now uses blocking read mode instead of callback mode for reliable audio capture on Linux systems.
+
+**If issues persist:**
+1. Update to the latest version
+2. Try different environment variables:
+   ```bash
+   export SDL_AUDIODRIVER=pulse
+   export ALSA_CARD=default
+   ```
+3. Check available audio devices:
+   ```bash
+   ./scripts/run_streaming_transcribe.sh --list-devices
+   ```
+4. See [AUDIO_STREAMING_FIXES.md](AUDIO_STREAMING_FIXES.md) for detailed technical information
+
+### Other Common Issues
+
+**No microphone detected:**
+- Verify your microphone is connected and working
+- Check system audio settings
+- List available devices with `--list-devices`
+
+**Slow transcription:**
+- Use a smaller Whisper model (e.g., `whisper-tiny` or `whisper-base`)
+- Reduce chunk duration: `--chunk-duration 2.0`
+- Consider using GPU acceleration: `--gpu`
+
+**Poor transcription accuracy:**
+- Specify the language explicitly: `--language en`
+- Use a larger model: `--model openai/whisper-medium`
+- Ensure good microphone quality and minimize background noise
+- Adjust VAD threshold for your environment
 - `es` - Spanish
 - `fr` - French
 - `de` - German

@@ -1,0 +1,12 @@
+# Optional Requirements for Parakeet Models
+
+# NVIDIA NeMo toolkit for Parakeet ASR models
+# Install with: pip install -r requirements_parakeet.txt
+
+# Core NeMo ASR package
+nemo_toolkit[asr]>=2.0.0
+
+# Note: This is optional and only needed if you want to use Parakeet models
+# like nvidia/parakeet-tdt-0.6b-v3
+# 
+# Whisper models work without this package and use only the base requirements.txt
