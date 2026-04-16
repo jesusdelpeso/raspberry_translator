@@ -10,6 +10,9 @@ soundfile>=0.12.1
 librosa>=0.10.0
 numpy>=1.24.0
 
+# Voice Activity Detection
+silero-vad>=5.0
+
 # Additional utilities
 scipy>=1.10.0
 sentencepiece>=0.1.99
@@ -17,5 +20,15 @@ protobuf>=3.20.0
 huggingface-hub>=0.16.0
 pyyaml>=6.0
 
+# Testing
+pytest>=7.0
+pytest-mock>=3.10
+httpx>=0.24         # Required by FastAPI TestClient
+
+# Web UI
+fastapi>=0.100
+uvicorn[standard]>=0.23
+
 # Optional: For better performance
-# optimum>=1.12.0
+# optimum>=1.12.0  # Base Optimum library
+# optimum[onnxruntime]>=1.12.0  # ONNX Runtime acceleration (Raspberry Pi / ARM)

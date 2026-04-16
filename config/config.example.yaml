@@ -1,6 +1,9 @@
 # Real-time Audio Translator Configuration (Example)
 # Copy this file to config.yaml and customize for your needs
 
+# Tip: run with --validate to check this file without starting the translator:
+#   python scripts/run_translator.py --config config/config.yaml --validate
+
 # Model Settings
 models:
   # Speech-to-Text model from Hugging Face
@@ -12,15 +15,30 @@ models:
   # Default supports 200+ languages
   translation_model: "facebook/nllb-200-distilled-1.3B"
   
-  # Text-to-Speech model from Hugging Face
-  # For multilingual: facebook/mms-tts-<lang_code>
+  # Text-to-Speech model selection
+  # When tts_auto_select is true (default), the TTS model is chosen
+  # automatically based on the target language (e.g. spa_Latn →
+  # facebook/mms-tts-spa).  The tts_model field below is only used
+  # when tts_auto_select is false, or as the fallback if auto-selection fails.
+  tts_auto_select: true
   tts_model: "facebook/mms-tts-eng"
 
 # Language Settings
 # Use NLLB language codes (see documentation for full list)
 languages:
-  source: "eng_Latn"  # Source language (what you speak)
+  source: "eng_Latn"  # Source language fallback (used when auto-detection is
+                      # disabled or the detected language has no NLLB mapping)
   target: "spa_Latn"  # Target language (what you want to translate to)
+  # When true, Whisper detects the spoken language automatically before each
+  # utterance and sets the NLLB source language accordingly.  This eliminates
+  # the need to set 'source' manually and supports mixed-language sessions.
+  # 'source' is still used as the fallback if detection fails.
+  auto_detect_source_lang: true
+  # When true and no languages are given via CLI or config file, an interactive
+  # menu is shown at startup so you can pick source and target languages.
+  # Automatically disabled when stdin is not a terminal (scripts / CI).
+  # Disable here, or pass --no-interactive on the command line, to skip it.
+  interactive_lang_select: true
 
 # Audio Settings
 audio:
@@ -34,6 +52,85 @@ performance:
   low_memory: true             # Optimize for low memory devices (Raspberry Pi)
   batch_size: 16               # Batch size for model inference
   max_new_tokens: 128          # Maximum tokens for STT generation
+  # ONNX Runtime acceleration (Raspberry Pi / ARM CPU)
+  # When true, models are loaded via Optimum's ONNX Runtime backend instead of
+  # standard PyTorch.  This can give 2-4× faster CPU inference on ARM devices
+  # such as Raspberry Pi 5.  Requires: pip install optimum[onnxruntime]
+  # Falls back to PyTorch automatically if the package is not installed.
+  # Note: first run with export=True will export models to ONNX format, which
+  # takes extra time but subsequent runs reuse the cached ONNX graphs.
+  use_onnx: false
+
+# Voice Activity Detection (VAD)
+# Silero VAD is used to skip silent audio chunks before running the STT model.
+# Requires sample_rate to be 8000 or 16000 Hz.
+vad:
+  enabled: true                # Set to false to disable VAD and process every chunk
+  threshold: 0.5               # Speech probability threshold (0.0-1.0).
+                               # Higher = less sensitive (fewer false positives).
+                               # Lower  = more sensitive (catches quiet speech).
+
+# Streaming STT
+# When enabled, audio is segmented at natural speech boundaries using Silero
+# VADIterator instead of fixed-duration recording chunks.  This produces
+# cleaner utterances aligned to actual speech and avoids mid-word cuts.
+# Requires sample_rate to be 8000 or 16000 Hz.
+streaming:
+  enabled: true                # true = boundary-based segmentation (recommended)
+                               # false = legacy fixed-duration chunks
+  min_silence_ms: 600          # Milliseconds of silence that ends an utterance.
+                               # Lower = quicker response; higher = fewer splits.
+  max_duration_s: 30.0         # Hard cap (seconds) on any single utterance.
+
+# Conversation Transcript History
+# show: print a bordered entry block after every utterance (transcript display).
+# save_path: optional file path; each utterance is appended as a JSON line.
+#            Useful for post-session analysis or exporting transcripts.
+# max_entries: maximum entries kept in memory (0 = unlimited).
+history:
+  show: true
+  save_path: null             # e.g. "logs/session.jsonl"
+  max_entries: 0
+
+# Logging Settings
+# level:   one of DEBUG, INFO, WARNING, ERROR (case-insensitive).
+#          DEBUG shows per-chunk VAD/detection details; INFO is the default.
+# file:    optional path to append log output in addition to stderr.
+#          Useful for capturing diagnostics across sessions.
+logging:
+  level: "INFO"               # DEBUG | INFO | WARNING | ERROR
+  file: null                  # e.g. "logs/translator.log"
+
+# Error Recovery Settings
+# Controls retry behaviour when models fail to load or the audio device
+# becomes unavailable during a session.
+#
+# model_load_retries:       max attempts to load each model (download errors,
+#                           OOM on first try, etc.).  Set to 1 to disable retry.
+# model_load_retry_delay_s: initial wait (seconds) before the first retry;
+#                           doubles on each subsequent attempt (max 60 s).
+# audio_device_retries:     max reconnect attempts when the microphone or
+#                           speaker disappears mid-session.
+# audio_device_retry_delay_s: initial wait (seconds) before reconnecting.
+recovery:
+  model_load_retries: 3
+  model_load_retry_delay_s: 5.0
+  audio_device_retries: 5
+  audio_device_retry_delay_s: 2.0
+
+# Bidirectional / Conversation Mode
+# When enabled, both translation directions are active simultaneously:
+#   A→B: source_lang → target_lang  (e.g. English → Spanish)
+#   B→A: target_lang → source_lang  (e.g. Spanish → English)
+# Direction selection:
+#   - auto_detect_source_lang: true  (recommended) — Whisper identifies the
+#     spoken language each utterance; the correct direction is chosen
+#     automatically.  No explicit turn-taking is needed.
+#   - auto_detect_source_lang: false — directions alternate automatically
+#     after each utterance (push-to-talk / alternating turns).
+# Activate via config or with the --bidirectional / -b CLI flag.
+conversation:
+  bidirectional: false             # true = two-way conversation mode
 
 # Common Language Codes Reference
 # English: eng_Latn
